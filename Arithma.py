@@ -1,4 +1,4 @@
-#Arithma Game (top level)
+# Arithma Game (top level)
 
 from Menu import *
 from Game import *
