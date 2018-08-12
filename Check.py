@@ -51,7 +51,7 @@ def check(pieces):
             print("not all on board")
             return False
 
-        # all have atleast 1 neighbor
+        # all have at least 1 neighbor
         if len(get_neighbors(pieces, piece)) == 0:
             print("not all have neighbors")
             return False
