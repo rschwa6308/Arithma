@@ -95,7 +95,7 @@ def main(screen, level):
             # run check algorithm
             if event.type == KEYDOWN:
                 if event.key == K_RETURN:
-                    if check(pieces) or True:
+                    if check_scrabble(pieces) or True:
                         print("success!!!")
                         overlay(screen)
                     else:
@@ -149,7 +149,7 @@ def main(screen, level):
                         if button.key == "H":
                             return
                         elif button.key == "C":
-                            if check(pieces):
+                            if check_scrabble(pieces):
                                 print("success!!!")
 
                                 ###pop up window###

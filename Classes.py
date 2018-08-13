@@ -7,7 +7,7 @@ from pygame import gfxdraw
 from Colors import *
 
 
-class Button():
+class Button:
     def __init__(self, x, y, width, height, color, txt_color, font, text, key):
         self.hover = 0
         self.bg = (255, 255, 255)
@@ -40,7 +40,7 @@ class Button():
         return img
 
 
-class Slider():
+class Slider:
     def __init__(self, start, length, x, color, bg_color):
         self.start = start
         self.length = length
@@ -64,7 +64,7 @@ class Slider():
         return image
 
 
-class Piece():
+class Piece:
     def __init__(self, data, grid, lock=False):
         self.data = data
         self.grid = grid
