@@ -84,7 +84,7 @@ class Piece:
         self.image.blit(piece_image, (0, 0))
         text_img = piece_font.render(str(data), 1, piece_color)
 
-        n = 3  # shadow width offset correction
+        n = 2  # shadow width offset correction
         self.image.blit(text_img, (50 / 2 - text_img.get_width() / 2 - n, 50 / 2 - text_img.get_height() / 2 - n))
         if self.locked:
             # TODO: Make up my mind already!
