@@ -5,6 +5,7 @@ import pygame
 from pygame import gfxdraw
 
 from Colors import *
+from Images import *
 
 
 class Button:
@@ -36,7 +37,7 @@ class Button:
 
         text_img = self.font.render(self.text, 1, self.txt_color)
         img.blit(text_img, (
-        self.width / 2 - text_img.get_width() / 2, self.height / 2 - text_img.get_height() / 2))  # auto center text
+            self.width / 2 - text_img.get_width() / 2, self.height / 2 - text_img.get_height() / 2))  # auto center text
         return img
 
 
@@ -65,18 +66,50 @@ class Slider:
 
 
 class Piece:
-    def __init__(self, data, grid, lock=False):
+    def __init__(self, data, grid, locked=False):
         self.data = data
         self.grid = grid
-        self.lock = lock
-        self.pos = (self.grid[0] * 60 + 5, self.grid[1] * 60 + 5)
+        self.locked = locked
+        self.pos = self.get_pos()
 
-        self.image = pygame.Surface((50, 50))
-        self.image.fill(piece_color)
-        # text_img = piece_font.render(unicode(data),1,text_color)
-        text_img = piece_font.render(str(data), 1, text_color)
-        self.image.blit(text_img,
-                        (50 / 2 - text_img.get_width() / 2, 50 / 2 - text_img.get_height() / 2))  # auto center text
+        # # Minimalistic - white text on black piece
+        # self.image = pygame.Surface((50, 50))
+        # self.image.fill(piece_color)
+        # text_img = piece_font.render(str(data), 1, text_color)
+        # self.image.blit(text_img, (50 / 2 - text_img.get_width() / 2, 50 / 2 - text_img.get_height() / 2))
+
+        # 3D - black text on white piece with black shadow
+        self.image = pygame.Surface((50, 50), pygame.SRCALPHA)
+        self.image.fill((0, 0, 0, 0))
+        self.image.blit(piece_image, (0, 0))
+        text_img = piece_font.render(str(data), 1, piece_color)
+
+        n = 3  # shadow width offset correction
+        self.image.blit(text_img, (50 / 2 - text_img.get_width() / 2 - n, 50 / 2 - text_img.get_height() / 2 - n))
+        if self.locked:
+            # TODO: Make up my mind already!
+            # # corner lines (straps)
+            # n = 8
+            # w = 2
+            # pygame.draw.line(self.image, white, (0, n), (n, 0), w)
+            # pygame.draw.line(self.image, white, (50 - n, 0), (50, n), w)
+            # pygame.draw.line(self.image, white, (50, 50 - n), (50 - n, 50), w)
+            # pygame.draw.line(self.image, white, (n, 50), (0, 50 - n), w)
+
+            # # corner circles (bolts)
+            # n = 6
+            # r = 2
+            # pygame.draw.circle(self.image, white, (n, n), r, 0)
+            # pygame.draw.circle(self.image, white, (50 - n, n), r, 0)
+            # pygame.draw.circle(self.image, white, (50 - n, 50 - n), r, 0)
+            # pygame.draw.circle(self.image, white, (n, 50 - n), r, 0)
+
+            # bold black lettering on white background # with black border
+            self.image.fill(background_color)
+            # n = 2
+            # pygame.draw.rect(self.image, background_color, pygame.Rect(n, n, 50 - 2 * n, 50 - 2 * n), 0)
+            text_img = piece_font.render(str(data), 1, piece_color)
+            self.image.blit(text_img, (50 / 2 - text_img.get_width() / 2, 50 / 2 - text_img.get_height() / 2))
 
     def get_pos(self):
         return (self.grid[0] * 60 + 5, self.grid[1] * 60 + 5)

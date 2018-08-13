@@ -5,7 +5,7 @@ from pygame import *
 from random import *
 
 from Classes import *
-from Funcs import *
+# from Funcs import *
 from Check import *
 from Levels import *
 from Menu import *
@@ -51,6 +51,40 @@ def overlay(screen, buttons, level):
     pygame.display.update()
 
 
+def display(screen, pieces, buttons):
+    width = screen.get_width()
+    height = screen.get_height()
+
+    g_width = (width - 200) / 10
+    g_height = height / 10
+
+    # clear screen
+    screen.fill(background_color)
+
+    # draw grid
+    for y in range(10):
+        pygame.draw.line(screen, grid_color, (0, y * g_height), (width - 200, y * g_height))
+    for x in range(10):
+        pygame.draw.line(screen, grid_color, (x * g_width, 0), (x * g_width, height))
+
+    # draw border and partitions
+    pygame.draw.rect(screen, grid_color, pygame.Rect(0, 0, width - 1, height - 1), 4)
+    pygame.draw.line(screen, grid_color, (width - 200, 0), (width - 200, height), 2)
+    # pygame.draw.line(screen, grid_color, (600,480), (800,480), 2)
+
+    # draw pieces
+    for piece in pieces:
+        # print piece.get_pos()
+        screen.blit(piece.image, piece.pos)
+
+    # draw buttons
+    for button in buttons:
+        screen.blit(button.get_image(), (button.x, button.y))
+
+    # flip display
+    pygame.display.update()
+
+
 # main() takes screen and a level index
 def main(screen, level):
     # set up screen
@@ -62,8 +96,8 @@ def main(screen, level):
 
     # init pieces (build from level)
     pieces = []
-    for l in Levels[level]:  # load in level
-        pieces.append(Piece(l[0], l[1]))
+    for p in Levels[level]:  # load in level
+        pieces.append(Piece(p[0], p[1], locked=p[1][0] < 10))
 
     # init buttons
     buttons = [
@@ -106,7 +140,11 @@ def main(screen, level):
                 if event.button == 1:
                     pos = mouse.get_pos()
                     pos = (int(pos[0] / 60), int(pos[1] / 60))
-                    selected = get_piece(pieces, pos)
+                    clicked = get_piece(pieces, pos)
+                    if clicked and not clicked.locked:  # if clicked is not None and piece is not locked
+                        selected = clicked
+                        pieces.remove(selected) # move selected to end of pieces list so it is rendered last (on top)
+                        pieces.append(selected)
                 for button in buttons:
                     if button.rect.collidepoint(event.pos):
                         button.hover = 3
