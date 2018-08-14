@@ -17,8 +17,7 @@ def display(screen, buttons):
                 (800 / 2 - title_img.get_width() / 2, 600 / 2 - title_img.get_height() / 2 - 200))  # auto center text
 
     # outline
-    pygame.draw.rect(screen, grid_color, pygame.Rect(0, 0, 800 - 1, 600 - 1),
-                     4)  # '-1' fixes bottom and right edge alignment
+    # pygame.draw.rect(screen, grid_color, pygame.Rect(0, 0, 800 - 1, 600 - 1), 4)  # '-1' fixes bottom and right edge alignment
 
     ##    #button box - MAYBE?
     ##    pygame.draw.rect(screen,grid_color, Rect(240, 190, 320, 340), 2)
@@ -121,8 +120,7 @@ def level_screen(screen):
         screen.fill(white)
 
         # outline
-        pygame.draw.rect(screen, grid_color, pygame.Rect(0, 0, 800 - 1, 600 - 1),
-                         4)  # '-1' fixes bottom and right edge alignment
+        # pygame.draw.rect(screen, grid_color, pygame.Rect(0, 0, 800 - 1, 600 - 1), 4)  # '-1' fixes bottom and right edge alignment
 
         # title
         title_img = title_font.render("Levels", True, grid_color)

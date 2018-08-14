@@ -36,9 +36,9 @@ def overlay(screen, buttons, level):
     mess_img_0 = credits_font.render("You beat level " + str(level + 1) + ".", True, grid_color)
     mess_img_1 = credits_font.render("Great work!", True, grid_color)
     box.blit(mess_img_0, (
-    box.get_width() / 2 - mess_img_0.get_width() / 2, box.get_height() / 2 - mess_img_0.get_height() / 2 - 75))
+        box.get_width() / 2 - mess_img_0.get_width() / 2, box.get_height() / 2 - mess_img_0.get_height() / 2 - 75))
     box.blit(mess_img_1, (
-    box.get_width() / 2 - mess_img_1.get_width() / 2, box.get_height() / 2 - mess_img_1.get_height() / 2 - 50))
+        box.get_width() / 2 - mess_img_1.get_width() / 2, box.get_height() / 2 - mess_img_1.get_height() / 2 - 50))
 
     # buttons
     for button in buttons:
@@ -51,7 +51,7 @@ def overlay(screen, buttons, level):
     pygame.display.update()
 
 
-def display(screen, pieces, buttons):
+def display(screen, pieces, selected, buttons):
     width = screen.get_width()
     height = screen.get_height()
 
@@ -72,10 +72,23 @@ def display(screen, pieces, buttons):
     pygame.draw.line(screen, grid_color, (width - 200, 0), (width - 200, height), 2)
     # pygame.draw.line(screen, grid_color, (600,480), (800,480), 2)
 
+    # sort pieces for proper rendering order
+    pieces.sort(key=lambda p: 10 * p.grid[1] + p.grid[0])
+    if selected:
+        pieces.remove(selected)  # move selected to end of pieces list so it is rendered last (on top)
+        pieces.append(selected)
+
+    positions_used = []
+
     # draw pieces
     for piece in pieces:
         # print piece.get_pos()
-        screen.blit(piece.image, piece.pos)
+        n = positions_used.count(piece.grid)
+        if n == 0:
+            screen.blit(piece.get_image(), piece.pos)
+        else:
+            screen.blit(piece.get_image(), (piece.pos[0] - 4 * n, piece.pos[1] - 4 * n))
+        positions_used.append(piece.grid)
 
     # draw buttons
     for button in buttons:
@@ -97,7 +110,11 @@ def main(screen, level):
     # init pieces (build from level)
     pieces = []
     for p in Levels[level]:  # load in level
-        pieces.append(Piece(p[0], p[1], locked=p[1][0] < 10))
+        if isinstance(p[0], str) and p[0][0] == "N":
+            size = int(p[0][1:])
+            pieces.append(NestedPiece(size, p[1], locked=p[1][0] < 10))
+        else:
+            pieces.append(Piece(p[0], p[1], locked=p[1][0] < 10))
 
     # init buttons
     buttons = [
@@ -105,11 +122,11 @@ def main(screen, level):
         Button(610, 545, 180, 40, grid_color, piece_color, button_font, "Home", "H")
     ]
 
-    # show board
-    display(screen, pieces, buttons)
-
     # init selected var
     selected = False
+
+    # show board
+    display(screen, pieces, selected, buttons)
 
     # set up clock
     clock = pygame.time.Clock()
@@ -143,12 +160,10 @@ def main(screen, level):
                     clicked = get_piece(pieces, pos)
                     if clicked and not clicked.locked:  # if clicked is not None and piece is not locked
                         selected = clicked
-                        pieces.remove(selected) # move selected to end of pieces list so it is rendered last (on top)
-                        pieces.append(selected)
                 for button in buttons:
                     if button.rect.collidepoint(event.pos):
                         button.hover = 3
-                        display(screen, pieces, buttons)
+                        display(screen, pieces, selected, buttons)
 
             # deselect (place) piece
             if event.type == MOUSEBUTTONUP:
@@ -160,6 +175,8 @@ def main(screen, level):
                                 pos[0] >= 10 and pos[1] >= 8):  # check if outside acceptable range
                             pass
                         elif get_piece(pieces, pos) == False or get_piece(pieces, pos) == selected:  # center
+                            selected.grid = pos
+                        elif get_piece(pieces, pos).data == selected.data and pos[0] >= 10:  # tile stacking in tray
                             selected.grid = pos
                         else:
                             delta_x = 1
@@ -176,14 +193,14 @@ def main(screen, level):
                                 selected.grid = (pos[0] + delta_x, pos[1] + delta_y)
 
                         selected.pos = selected.get_pos()
-                        display(screen, pieces, buttons)
                         selected = False
+                        display(screen, pieces, selected, buttons)
 
                 # button execution
                 for button in buttons:
                     if button.hover == 3:  # include 'button.rect.collidepoint(event.pos)' if cursor must be over button to activate
                         button.hover = 0
-                        display(screen, pieces, buttons)
+                        display(screen, pieces, selected, buttons)
                         if button.key == "H":
                             return
                         elif button.key == "C":
@@ -249,31 +266,31 @@ def main(screen, level):
                                     button.color = red
                                     button.txt_color = red
                                     button.bg = background_color
-                                    display(screen, pieces, buttons)
+                                    display(screen, pieces, selected, buttons)
                                     pygame.time.wait(100)
                                     button.color = grid_color
                                     button.txt_color = piece_color
                                     button.bg = red
-                                    display(screen, pieces, buttons)
+                                    display(screen, pieces, selected, buttons)
                                     pygame.time.wait(100)
                                 button.bg = white
                                 button.color = grid_color
                                 button.txt_color = piece_color
-                                display(screen, pieces, buttons)
+                                display(screen, pieces, selected, buttons)
 
             # update pos of selected piece
             if selected != False:
                 selected.pos = (mouse.get_pos()[0] - 25, mouse.get_pos()[1] - 25)
-                display(screen, pieces, buttons)
+                display(screen, pieces, selected, buttons)
 
             # hover shading
             pos = pygame.mouse.get_pos()
             for button in buttons:
                 if button.rect.collidepoint(pos) and button.hover == 0:
                     button.hover = 1
-                    display(screen, pieces, buttons)
+                    display(screen, pieces, selected, buttons)
                 elif not button.rect.collidepoint(pos) and button.hover == 1:  # will only update screen when necessary
                     button.hover = 0
-                    display(screen, pieces, buttons)
+                    display(screen, pieces, selected, buttons)
 
 # main(L1)

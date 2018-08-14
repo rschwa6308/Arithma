@@ -1,3 +1,3 @@
 import pygame
 
-piece_image = pygame.image.load("Assets/piece_3d.png")
+piece_image = pygame.image.load("Assets/piece_3d_short.png")

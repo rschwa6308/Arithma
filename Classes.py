@@ -6,6 +6,7 @@ from pygame import gfxdraw
 
 from Colors import *
 from Images import *
+from Check import *
 
 
 class Button:
@@ -84,7 +85,7 @@ class Piece:
         self.image.blit(piece_image, (0, 0))
         text_img = piece_font.render(str(data), 1, piece_color)
 
-        n = 2  # shadow width offset correction
+        n = 1  # shadow width offset correction
         self.image.blit(text_img, (50 / 2 - text_img.get_width() / 2 - n, 50 / 2 - text_img.get_height() / 2 - n))
         if self.locked:
             # TODO: Make up my mind already!
@@ -113,3 +114,49 @@ class Piece:
 
     def get_pos(self):
         return (self.grid[0] * 60 + 5, self.grid[1] * 60 + 5)
+
+    def get_image(self):
+        return self.image
+
+
+class NestedPiece(Piece):
+    def __init__(self, size, grid, locked=False):
+        self.size = size
+        self.grid = grid
+        self.locked = locked
+        self.pos = self.get_pos()
+
+        self.contents = [None for _ in range(self.size)]
+        self.contents = [Piece(1, (0, 0)), Piece("+", (0, 0)), None] # Piece(2, (0, 0))]  # test dummy data
+
+    def get_image(self):
+        self.image = pygame.Surface((50, 50), pygame.SRCALPHA)
+        self.image.fill((0, 0, 0, 0))
+        self.image.blit(piece_image, (0, 0))
+
+        # # split rectangle (grid look)
+        # n = 42 / size
+        # pygame.draw.rect(self.image, piece_color, pygame.Rect(4, 4, n, 42), 1)
+        # for i in range(size):
+        #     pygame.draw.line(self.image, piece_color, (4, 4 + i * n), (4 + n, 4 + i * n), 1)
+
+        # distinct squares
+        n = 42 / self.size
+        dim = 8
+        for i in range(self.size):
+            p = self.contents[i]
+            # if spot is filled, draw filled square
+            if p:
+                pygame.draw.rect(self.image, piece_color, pygame.Rect(6, 6 + i * n, dim, dim), 0)
+            else:
+                pygame.draw.rect(self.image, piece_color, pygame.Rect(6, 6 + i * n, dim, dim), 1)
+
+        if all(self.contents):
+            self.data = get_value([p.data for p in self.contents])
+            print(self.data)
+            text_img = piece_font.render(str(self.data), 1, piece_color)
+            n = 1  # shadow width offset correction
+            self.image.blit(text_img,
+                            (6 + 50 / 2 - text_img.get_width() / 2 - n, 50 / 2 - text_img.get_height() / 2 - n))
+
+        return self.image
