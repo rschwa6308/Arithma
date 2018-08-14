@@ -87,7 +87,13 @@ def display(screen, pieces, selected, buttons):
         if n == 0:
             screen.blit(piece.get_image(), piece.pos)
         else:
-            screen.blit(piece.get_image(), (piece.pos[0] - 4 * n, piece.pos[1] - 4 * n))
+            offset_x = 5    # the ratio of these two values determines the slope at which the stack renders
+            offset_y = 5    # slope should match that of tile source image
+            draw_x, draw_y = piece.pos[0] - offset_x * n, piece.pos[1] - offset_y * n
+            screen.blit(piece.get_image(), (draw_x, draw_y))
+            # # draw lines to separate pieces (only *necessary* if offset < tile height)
+            pygame.draw.line(screen, (220, 220, 220), (draw_x + offset_x, draw_y + 50), (draw_x + 50, draw_y + 50), 1)
+            pygame.draw.line(screen, (140, 140, 140), (draw_x + 50, draw_y + 50), (draw_x + 50, draw_y + offset_y), 1)
         positions_used.append(piece.grid)
 
     # draw buttons

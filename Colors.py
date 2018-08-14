@@ -21,11 +21,11 @@ red = (255, 0, 0)
 yellow = (255, 219, 88)
 brown = (139, 69, 19)
 
-###worlds worst color scheme
-##background_color = (255,0,0)
-##grid_color = purple
-##piece_color = brown            
-##text_color = (0,255,255)
+# #worlds worst color scheme
+# background_color = (255,0,0)
+# grid_color = purple
+# piece_color = brown
+# text_color = (0,255,255)
 
 A = white
 B = black
