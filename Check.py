@@ -13,7 +13,7 @@ def get_neighbors(pieces, piece):
 
 # takes a subpipe (left or right) and returns arithmetic value
 def get_value(subpipe):
-    print('get_value called on subpipe: ', subpipe)
+    # print('get_value called on subpipe: ', subpipe)
     num_count = 0   # running tally of num of consecutive numbers
     try:
         for n in range(len(subpipe)):
@@ -57,12 +57,12 @@ def check(pieces):
     for piece in pieces:
         # all on board
         if piece.grid[0] > 9:
-            print("not all on board")
+            # print("not all on board")
             return False
 
         # all have at least 1 neighbor
         if len(get_neighbors(pieces, piece)) == 0:
-            print("not all have neighbors")
+            # print("not all have neighbors")
             return False
 
         # all "="s have an even number of neighbors
@@ -85,7 +85,7 @@ def check(pieces):
 
     for p in pipe:
         pipe_data.append(p.data)
-        print(p.data)
+        # print(p.data)
 
     # analyze pipe
     n = pipe_data.index("=")
@@ -94,16 +94,16 @@ def check(pieces):
     right.reverse()  # operate towards "="
 
     try:
-        print(left)
-        print(get_value(left))
-        print("")
-        print(right)
-        print(get_value(right))
+        # print(left)
+        # print(get_value(left))
+        # print("")
+        # print(right)
+        # print(get_value(right))
 
         return get_value(left) == get_value(right)
 
     except:
-        print("error")
+        # print("error")
         return False
 
 
@@ -113,12 +113,12 @@ def check_scrabble(pieces):
     for piece in pieces:
         # all on board
         if piece.grid[0] > 9:
-            print("not all on board")
+            # print("not all on board")
             return False
 
         # all have at least 1 neighbor
         if len(get_neighbors(pieces, piece)) == 0:
-            print("not all have neighbors")
+            # print("not all have neighbors")
             return False
 
         # all "="s have an even number of neighbors
@@ -152,7 +152,7 @@ def check_scrabble(pieces):
 
             if len(left) > 0 and len(right) > 0:
                 if get_value(left) != get_value(right):
-                    print("left and right disagree")
+                    # print("left and right disagree")
                     return False
             else:
                 # if exactly one side is missing, fail
@@ -177,7 +177,7 @@ def check_scrabble(pieces):
 
             if len(top) > 0 and len(bottom) > 0:
                 if get_value(top) != get_value(bottom):
-                    print("top and bottom disagree")
+                    # print("top and bottom disagree")
                     return False
             else:
                 # if exactly one side is missing, fail

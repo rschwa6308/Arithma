@@ -172,7 +172,7 @@ def main(screen, level):
                     pos = (int(pos[0] / 60), int(pos[1] / 60))
                     if selected != False:
                         if pos[0] > 12 or pos[1] > 9 or (
-                                pos[0] >= 10 and pos[1] >= 8):  # check if outside acceptable range
+                                        pos[0] >= 10 and pos[1] >= 8):  # check if outside acceptable range
                             pass
                         elif get_piece(pieces, pos) == False or get_piece(pieces, pos) == selected:  # center
                             selected.grid = pos
@@ -183,12 +183,11 @@ def main(screen, level):
                             delta_y = 0
                             tries = 0
                             while get_piece(pieces, (pos[0] + delta_x, pos[1] + delta_y)) != False and tries <= 100 or (
-                                    pos[0] + delta_x > 12 or pos[1] + delta_y > 9 or (
-                                    pos[0] + delta_x >= 10 and pos[1] + delta_y >= 8)):
+                                                    pos[0] + delta_x > 12 or pos[1] + delta_y > 9 or (
+                                                        pos[0] + delta_x >= 10 and pos[1] + delta_y >= 8)):
                                 delta_x = randint(-1, 1)
                                 delta_y = randint(-1, 1)
                                 tries += 1
-                                print(pos[0] + delta_x, pos[1] + delta_y)
                             if tries < 100:
                                 selected.grid = (pos[0] + delta_x, pos[1] + delta_y)
 
@@ -205,7 +204,7 @@ def main(screen, level):
                             return
                         elif button.key == "C":
                             if check_scrabble(pieces):
-                                print("success!!!")
+                                # print("success!!!")
 
                                 ###pop up window###
                                 buttons = [
@@ -224,7 +223,7 @@ def main(screen, level):
                                         elif event.type == pygame.MOUSEBUTTONDOWN:
                                             for button in buttons:
                                                 if button.rect.collidepoint((event.pos[0] - 250, event.pos[
-                                                                                                     1] - 100)):  # compensate for offset origin
+                                                    1] - 100)):  # compensate for offset origin
                                                     button.hover = 3
                                                     overlay(screen, buttons, level)
 
@@ -239,7 +238,7 @@ def main(screen, level):
                                                         main(screen, level + 1)
                                                         return
                                                     elif button.key == "R":
-                                                        print("restart")
+                                                        # print("restart")
                                                         main(screen, level)  # does not work!?!?!
                                                         return
                                                     elif button.key == "H":
@@ -260,7 +259,7 @@ def main(screen, level):
 
 
                             else:
-                                print("failure!!!")
+                                # print("failure!!!")
                                 # flash red
                                 for i in range(2):
                                     button.color = red

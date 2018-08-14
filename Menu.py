@@ -79,16 +79,16 @@ def home_screen():
                         display(screen, buttons)
                         # programmatic control
                         if button.key == "L":
-                            print("levels")
+                            # print("levels")
                             level_screen(screen)
                             pygame.display.quit()
                             return
                         elif button.key == "S":
-                            print("settings")
+                            # print("settings")
                             settings_screen(screen)
                             pygame.display.quit()
                         elif button.key == "C":
-                            print("credits")
+                            # print("credits")
                             credits_screen(screen)
                             pygame.display.quit()
                             return
