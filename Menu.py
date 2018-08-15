@@ -53,9 +53,12 @@ def home_screen():
     # display screen initially
     display(screen, buttons)
 
+    clock = pygame.time.Clock()
+
     # control loop
     done = False
     while not done:
+        clock.tick(60)
 
         # user input
         for event in pygame.event.get():
@@ -134,7 +137,11 @@ def level_screen(screen):
 
     display(screen)
 
+    clock = pygame.time.Clock()
+
     while True:
+        clock.tick(60)
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return
@@ -201,7 +208,10 @@ def settings_screen(screen):
 
     display(screen, buttons, sliders)
 
+    clock = pygame.time.Clock()
+
     while True:
+        clock.tick(60)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return
@@ -268,7 +278,10 @@ def credits_screen(screen):
 
     display(screen)
 
+    clock = pygame.time.Clock()
+
     while True:
+        clock.tick(60)
         for event in pygame.event.get():
             if event.type == QUIT:
                 return

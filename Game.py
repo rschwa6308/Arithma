@@ -136,12 +136,12 @@ def main(screen, level):
 
     # set up clock
     clock = pygame.time.Clock()
-    clock.tick(60)
 
     # game loop
     done = False
 
     while not done:
+        clock.tick(60)
 
         # user input
         for event in pygame.event.get():
