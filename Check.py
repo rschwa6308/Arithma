@@ -131,27 +131,32 @@ def check_scrabble(pieces):
     for piece in pieces:
         board[piece.grid[1]][piece.grid[0]] = piece
 
+    used = []   # keep track of which pieces are used to form equations
+
     for piece in pieces:
         if piece.data == "=":
 
             # check row
             pos = list(piece.grid)
+            pos[0] -= 1
             left = []
-            while pos[0] >= 0 and board[pos[1]][pos[0]]:
-                left.append(board[pos[1]][pos[0]].data)
+            while pos[0] >= 0 and board[pos[1]][pos[0]] and board[pos[1]][pos[0]].data != "=":
+                left.append(board[pos[1]][pos[0]])
                 pos[0] -= 1
-            left.pop(0)
+            # left.pop(0)
             left.reverse()
 
             pos = list(piece.grid)
+            pos[0] += 1
             right = []
-            while pos[0] <= 9 and board[pos[1]][pos[0]]:
-                right.append(board[pos[1]][pos[0]].data)
+            while pos[0] <= 9 and board[pos[1]][pos[0]] and board[pos[1]][pos[0]].data != "=":
+                right.append(board[pos[1]][pos[0]])
                 pos[0] += 1
-            right.pop(0)
+            # right.pop(0)
 
             if len(left) > 0 and len(right) > 0:
-                if get_value(left) != get_value(right):
+                used.extend(left + [piece] + right)
+                if get_value([p.data for p in left]) != get_value([p.data for p in right]):
                     # print("left and right disagree")
                     return False
             else:
@@ -161,27 +166,34 @@ def check_scrabble(pieces):
 
             # check column
             pos = list(piece.grid)
+            pos[1] -= 1
             top = []
-            while pos[1] >= 0 and board[pos[1]][pos[0]]:
-                top.append(board[pos[1]][pos[0]].data)
+            while pos[1] >= 0 and board[pos[1]][pos[0]] and board[pos[1]][pos[0]].data != "=":
+                top.append(board[pos[1]][pos[0]])
                 pos[1] -= 1
-            top.pop(0)
+            # top.pop(0)
             top.reverse()
 
             pos = list(piece.grid)
+            pos[1] += 1
             bottom = []
-            while pos[1] <= 9 and board[pos[1]][pos[0]]:
-                bottom.append(board[pos[1]][pos[0]].data)
+            while pos[1] <= 9 and board[pos[1]][pos[0]] and board[pos[1]][pos[0]].data != "=":
+                bottom.append(board[pos[1]][pos[0]])
                 pos[1] += 1
-            bottom.pop(0)
+            # bottom.pop(0)
 
             if len(top) > 0 and len(bottom) > 0:
-                if get_value(top) != get_value(bottom):
+                used.extend(top + [piece] + bottom)
+                if get_value([p.data for p in top]) != get_value([p.data for p in bottom]):
                     # print("top and bottom disagree")
                     return False
             else:
                 # if exactly one side is missing, fail
                 if max(len(top), len(bottom)) > 0:
                     return False
+
+    # if not all pieces are used in at least one equation, fail
+    if len(set(used)) < len(pieces):
+        return False
 
     return True
