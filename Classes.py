@@ -85,7 +85,7 @@ class Piece:
         self.image.blit(piece_image, (0, 0))
         text_img = piece_font.render(str(data), 1, piece_color)
 
-        n = 1  # shadow width offset correction
+        n = 2  # shadow width offset correction
         self.image.blit(text_img, (50 / 2 - text_img.get_width() / 2 - n, 50 / 2 - text_img.get_height() / 2 - n))
         if self.locked:
             # TODO: Make up my mind already!
@@ -115,9 +115,6 @@ class Piece:
     def get_pos(self):
         return (self.grid[0] * 60 + 5, self.grid[1] * 60 + 5)
 
-    def get_image(self):
-        return self.image
-
 
 class NestedPiece(Piece):
     def __init__(self, size, grid, locked=False):
@@ -127,12 +124,20 @@ class NestedPiece(Piece):
         self.pos = self.get_pos()
 
         self.contents = [None for _ in range(self.size)]
-        self.contents = [Piece(1, (0, 0)), Piece("+", (0, 0)), None] # Piece(2, (0, 0))]  # test dummy data
+        # self.contents = [Piece(1, (0, 0)), Piece("+", (0, 0)), None] # Piece(2, (0, 0))]  # test dummy contents
 
-    def get_image(self):
+        self.data = None
+
+        self.update_image()
+
+    def insert(self, piece):
+        self.contents[self.contents.index(None)] = piece
+        self.update_image()
+
+    def update_image(self):
         self.image = pygame.Surface((50, 50), pygame.SRCALPHA)
         self.image.fill((0, 0, 0, 0))
-        self.image.blit(piece_image, (0, 0))
+        self.image.blit(nested_piece_image, (0, 0))
 
         # # split rectangle (grid look)
         # n = 42 / size
@@ -154,9 +159,8 @@ class NestedPiece(Piece):
         if all(self.contents):
             self.data = get_value([p.data for p in self.contents])
             print(self.data)
-            text_img = piece_font.render(str(self.data), 1, piece_color)
-            n = 1  # shadow width offset correction
-            self.image.blit(text_img,
-                            (6 + 50 / 2 - text_img.get_width() / 2 - n, 50 / 2 - text_img.get_height() / 2 - n))
-
-        return self.image
+            if self.data:
+                text_img = piece_font.render(str(self.data), 1, piece_color)
+                n = 2  # shadow width offset correction
+                self.image.blit(text_img,
+                                (6 + 50 / 2 - text_img.get_width() / 2 - n, 50 / 2 - text_img.get_height() / 2 - n))

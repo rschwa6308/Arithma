@@ -13,7 +13,7 @@ def get_neighbors(pieces, piece):
 
 # takes a subpipe (left or right) and returns arithmetic value
 def get_value(subpipe):
-    # print('get_value called on subpipe: ', subpipe)
+    print('get_value called on subpipe: ', subpipe)
     num_count = 0   # running tally of num of consecutive numbers
     try:
         for n in range(len(subpipe)):

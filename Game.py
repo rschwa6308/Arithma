@@ -85,12 +85,12 @@ def display(screen, pieces, selected, buttons):
         # print piece.get_pos()
         n = positions_used.count(piece.grid)
         if n == 0:
-            screen.blit(piece.get_image(), piece.pos)
+            screen.blit(piece.image, piece.pos)
         else:
-            offset_x = 5    # the ratio of these two values determines the slope at which the stack renders
-            offset_y = 5    # slope should match that of tile source image
+            offset_x = 5  # the ratio of these two values determines the slope at which the stack renders
+            offset_y = 5  # slope should match that of tile source image
             draw_x, draw_y = piece.pos[0] - offset_x * n, piece.pos[1] - offset_y * n
-            screen.blit(piece.get_image(), (draw_x, draw_y))
+            screen.blit(piece.image, (draw_x, draw_y))
             # # draw lines to separate pieces (only *necessary* if offset < tile height)
             pygame.draw.line(screen, (220, 220, 220), (draw_x + offset_x, draw_y + 50), (draw_x + 50, draw_y + 50), 1)
             pygame.draw.line(screen, (140, 140, 140), (draw_x + 50, draw_y + 50), (draw_x + 50, draw_y + offset_y), 1)
@@ -176,21 +176,27 @@ def main(screen, level):
                 if event.button == 1:
                     pos = mouse.get_pos()
                     pos = (int(pos[0] / 60), int(pos[1] / 60))
-                    if selected != False:
+                    if selected:
                         if pos[0] > 12 or pos[1] > 9 or (
-                                        pos[0] >= 10 and pos[1] >= 8):  # check if outside acceptable range
+                                pos[0] >= 10 and pos[1] >= 8):  # check if outside acceptable range
                             pass
-                        elif get_piece(pieces, pos) == False or get_piece(pieces, pos) == selected:  # center
+                        elif get_piece(pieces, pos) == False or get_piece(pieces, pos) == selected:
                             selected.grid = pos
                         elif get_piece(pieces, pos).data == selected.data and pos[0] >= 10:  # tile stacking in tray
                             selected.grid = pos
+                        # insert into nested piece
+                        elif isinstance(get_piece(pieces, pos), NestedPiece) and \
+                                None in get_piece(pieces, pos).contents:
+                            print("nesting yay!")
+                            get_piece(pieces, pos).insert(selected)
+                            pieces.remove(selected)  # temporary
                         else:
                             delta_x = 1
                             delta_y = 0
                             tries = 0
                             while get_piece(pieces, (pos[0] + delta_x, pos[1] + delta_y)) != False and tries <= 100 or (
-                                                    pos[0] + delta_x > 12 or pos[1] + delta_y > 9 or (
-                                                        pos[0] + delta_x >= 10 and pos[1] + delta_y >= 8)):
+                                    pos[0] + delta_x > 12 or pos[1] + delta_y > 9 or (
+                                    pos[0] + delta_x >= 10 and pos[1] + delta_y >= 8)):
                                 delta_x = randint(-1, 1)
                                 delta_y = randint(-1, 1)
                                 tries += 1
@@ -229,7 +235,7 @@ def main(screen, level):
                                         elif event.type == pygame.MOUSEBUTTONDOWN:
                                             for button in buttons:
                                                 if button.rect.collidepoint((event.pos[0] - 250, event.pos[
-                                                    1] - 100)):  # compensate for offset origin
+                                                                                                     1] - 100)):  # compensate for offset origin
                                                     button.hover = 3
                                                     overlay(screen, buttons, level)
 
