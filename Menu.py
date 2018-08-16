@@ -35,6 +35,7 @@ def home_screen():
     os.environ["SDL_VIDEO_CENTERED"] = "1"
     screen = pygame.display.set_mode((800, 600))
     pygame.display.set_caption("Arithma")
+    pygame.display.set_icon(icon_image)
 
     # define buttons
     buttons = [

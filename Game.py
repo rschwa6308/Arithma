@@ -19,6 +19,18 @@ def get_piece(pieces, coords):
     return False
 
 
+# takes a level number and returns a list of pieces
+def load_level(level_num):
+    pieces = []
+    for p in Levels[level_num]:  # load in level
+        if isinstance(p[0], str) and p[0][0] == "N":
+            size = int(p[0][1:])
+            pieces.append(NestedPiece(size, p[1], locked=p[1][0] < 10))
+        else:
+            pieces.append(Piece(p[0], p[1], locked=p[1][0] < 10))
+    return pieces
+
+
 def overlay(screen, buttons, level):
     # box
     box = pygame.Surface((300, 400))
@@ -61,11 +73,29 @@ def display(screen, pieces, selected, buttons):
     # clear screen
     screen.fill(background_color)
 
+    grid_colors_hor = [
+        (175, 175, 175),
+        (175, 175, 175),
+        (50, 50, 50)
+    ]
+
+    grid_colors_vert = [
+        (125, 125, 125),
+        (150, 150, 150),
+        (0, 0, 0)
+    ]
+
     # draw grid
     for y in range(10):
-        pygame.draw.line(screen, grid_color, (0, y * g_height), (width - 200, y * g_height))
+        pygame.draw.line(screen, grid_colors_hor[0], (0, y * g_height - 1), (width - 200, y * g_height - 1))
+        pygame.draw.line(screen, grid_colors_hor[2], (0, y * g_height + 1), (width - 200, y * g_height + 1))
     for x in range(10):
-        pygame.draw.line(screen, grid_color, (x * g_width, 0), (x * g_width, height))
+        pygame.draw.line(screen, grid_colors_vert[0], (x * g_width - 1, 0), (x * g_width - 1, height))
+        pygame.draw.line(screen, grid_colors_vert[2], (x * g_width + 1, 0), (x * g_width + 1, height))
+    for y in range(10):
+        pygame.draw.line(screen, grid_colors_hor[1], (0, y * g_height), (width - 200, y * g_height))
+    for x in range(10):
+        pygame.draw.line(screen, grid_colors_vert[1], (x * g_width, 0), (x * g_width, height))
 
     # draw border and partitions
     pygame.draw.rect(screen, grid_color, pygame.Rect(0, 0, width - 1, height - 1), 4)
@@ -114,19 +144,16 @@ def main(screen, level):
     pygame.display.set_caption("Level " + str(level + 1))
 
     # init pieces (build from level)
-    pieces = []
-    for p in Levels[level]:  # load in level
-        if isinstance(p[0], str) and p[0][0] == "N":
-            size = int(p[0][1:])
-            pieces.append(NestedPiece(size, p[1], locked=p[1][0] < 10))
-        else:
-            pieces.append(Piece(p[0], p[1], locked=p[1][0] < 10))
+
 
     # init buttons
     buttons = [
-        Button(610, 495, 180, 40, grid_color, piece_color, button_font, "Check", "C"),
-        Button(610, 545, 180, 40, grid_color, piece_color, button_font, "Home", "H")
+        Button(615, 545, 50, 50, grid_color, piece_color, button_font, "", "C", check_image),
+        Button(675, 545, 50, 50, grid_color, piece_color, button_font, "", "R", reset_image),
+        Button(735, 545, 50, 50, grid_color, piece_color, button_font, "", "H", home_image)
     ]
+
+    pieces = load_level(level)
 
     # init selected var
     selected = False
@@ -152,9 +179,9 @@ def main(screen, level):
             # run check algorithm
             if event.type == KEYDOWN:
                 if event.key == K_RETURN:
-                    if check_scrabble(pieces) or True:
+                    if check_scrabble(pieces):
                         print("success!!!")
-                        overlay(screen)
+                        overlay(screen, buttons, level)  # TODO actually make this work
                     else:
                         print("failure!!!")
 
@@ -162,7 +189,11 @@ def main(screen, level):
             if event.type == MOUSEBUTTONDOWN:
                 if event.button == 1:
                     pos = mouse.get_pos()
-                    pos = (int(pos[0] / 60), int(pos[1] / 60))
+                    # decide grid location based on whether on board or rack
+                    if pos[0] > 600:
+                        pos = (int((pos[0] - 10) / 60), int(pos[1] / 60))
+                    else:
+                        pos = (int(pos[0] / 60), int(pos[1] / 60))
                     clicked = get_piece(pieces, pos)
                     if clicked and not clicked.locked:  # if clicked is not None and piece is not locked
                         selected = clicked
@@ -178,7 +209,7 @@ def main(screen, level):
                     pos = (int(pos[0] / 60), int(pos[1] / 60))
                     if selected:
                         if pos[0] > 12 or pos[1] > 9 or (
-                                pos[0] >= 10 and pos[1] >= 8):  # check if outside acceptable range
+                                        pos[0] >= 10 and pos[1] >= 9):  # check if outside acceptable range
                             pass
                         elif get_piece(pieces, pos) == False or get_piece(pieces, pos) == selected:
                             selected.grid = pos
@@ -186,7 +217,7 @@ def main(screen, level):
                             selected.grid = pos
                         # insert into nested piece
                         elif isinstance(get_piece(pieces, pos), NestedPiece) and \
-                                None in get_piece(pieces, pos).contents:
+                                        None in get_piece(pieces, pos).contents:
                             print("nesting yay!")
                             get_piece(pieces, pos).insert(selected)
                             pieces.remove(selected)  # temporary
@@ -195,8 +226,8 @@ def main(screen, level):
                             delta_y = 0
                             tries = 0
                             while get_piece(pieces, (pos[0] + delta_x, pos[1] + delta_y)) != False and tries <= 100 or (
-                                    pos[0] + delta_x > 12 or pos[1] + delta_y > 9 or (
-                                    pos[0] + delta_x >= 10 and pos[1] + delta_y >= 8)):
+                                                    pos[0] + delta_x > 12 or pos[1] + delta_y > 9 or (
+                                                        pos[0] + delta_x >= 10 and pos[1] + delta_y >= 8)):
                                 delta_x = randint(-1, 1)
                                 delta_y = randint(-1, 1)
                                 tries += 1
@@ -212,9 +243,7 @@ def main(screen, level):
                     if button.hover == 3:  # include 'button.rect.collidepoint(event.pos)' if cursor must be over button to activate
                         button.hover = 0
                         display(screen, pieces, selected, buttons)
-                        if button.key == "H":
-                            return
-                        elif button.key == "C":
+                        if button.key == "C":
                             if check_scrabble(pieces):
                                 # print("success!!!")
 
@@ -235,7 +264,7 @@ def main(screen, level):
                                         elif event.type == pygame.MOUSEBUTTONDOWN:
                                             for button in buttons:
                                                 if button.rect.collidepoint((event.pos[0] - 250, event.pos[
-                                                                                                     1] - 100)):  # compensate for offset origin
+                                                    1] - 100)):  # compensate for offset origin
                                                     button.hover = 3
                                                     overlay(screen, buttons, level)
 
@@ -288,6 +317,10 @@ def main(screen, level):
                                 button.color = grid_color
                                 button.txt_color = piece_color
                                 display(screen, pieces, selected, buttons)
+                        elif button.key == "R":
+                            pieces = load_level(level)
+                        elif button.key == "H":
+                            return
 
             # update pos of selected piece
             if selected != False:

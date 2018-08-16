@@ -10,7 +10,7 @@ from Check import *
 
 
 class Button:
-    def __init__(self, x, y, width, height, color, txt_color, font, text, key):
+    def __init__(self, x, y, width, height, color, txt_color, font, text, key, image=None):
         self.hover = 0
         self.bg = (255, 255, 255)
 
@@ -28,17 +28,19 @@ class Button:
 
         self.key = key
 
+        self.image = image
+
     def get_image(self):
         img = pygame.Surface((self.width, self.height))
         img.fill((self.bg[0] - 50 * self.hover, self.bg[1] - 50 * self.hover, self.bg[2] - 50 * self.hover))
         bwidth = 2
-        buff = bwidth - 1
-        pygame.draw.rect(img, self.color, pygame.Rect(buff, buff, self.width - 2 * buff, self.height - 2 * buff),
+        pygame.draw.rect(img, self.color, pygame.Rect(0, 0, self.width - 1, self.height - 1),
                          bwidth)
-
-        text_img = self.font.render(self.text, 1, self.txt_color)
-        img.blit(text_img, (
-            self.width / 2 - text_img.get_width() / 2, self.height / 2 - text_img.get_height() / 2))  # auto center text
+        if self.image:
+            label_img = self.image
+        else:
+            label_img = self.font.render(self.text, 1, self.txt_color)
+        img.blit(label_img, (self.width / 2 - label_img.get_width() / 2, self.height / 2 - label_img.get_height() / 2))
         return img
 
 
@@ -113,7 +115,10 @@ class Piece:
             self.image.blit(text_img, (50 / 2 - text_img.get_width() / 2, 50 / 2 - text_img.get_height() / 2))
 
     def get_pos(self):
-        return (self.grid[0] * 60 + 5, self.grid[1] * 60 + 5)
+        if self.grid[0] < 10:
+            return self.grid[0] * 60 + 5, self.grid[1] * 60 + 5
+        else:
+            return self.grid[0] * 60 + 15, self.grid[1] * 60 + 5
 
 
 class NestedPiece(Piece):
