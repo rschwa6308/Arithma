@@ -1,16 +1,18 @@
 import pygame
 
-# fonts
 pygame.init()
+
+# fonts
 piece_font = pygame.font.SysFont("verdana", 25)
 piece_font_bold = pygame.font.SysFont("verdana", 25, bold=True)
+
 title_font = pygame.font.SysFont("Dotum", 80)
 title_font.set_underline(True)
+
 credits_font = pygame.font.SysFont("Lucida Console", 20)
 button_font = pygame.font.SysFont("verdana", 20)
 
 # colors
-
 black = (0, 0, 0)
 white = (255, 255, 255)
 

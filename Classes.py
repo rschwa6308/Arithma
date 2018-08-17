@@ -85,7 +85,8 @@ class Piece:
         self.image = pygame.Surface((50, 50), pygame.SRCALPHA)
         self.image.fill((0, 0, 0, 0))
         self.image.blit(piece_image, (0, 0))
-        text_img = piece_font.render(str(data), 1, piece_color)
+        font_size = [None, 25, 25, 23, 17, 13, 10, 5][min(len(str(self.data)), 7)]
+        text_img = pygame.font.SysFont("verdana", font_size).render(str(self.data), 1, piece_color)
 
         n = 2  # shadow width offset correction
         self.image.blit(text_img, (50 / 2 - text_img.get_width() / 2 - n, 50 / 2 - text_img.get_height() / 2 - n))
@@ -164,8 +165,9 @@ class NestedPiece(Piece):
         if all(self.contents):
             self.data = get_value([p.data for p in self.contents])
             print(self.data)
-            if self.data:
-                text_img = piece_font.render(str(self.data), 1, piece_color)
+            if self.data is not None:
+                font_size = [None, 25, 25, 15, 11, 8, 5, 5][min(len(str(self.data)), 7)]
+                text_img = pygame.font.SysFont("verdana", font_size).render(str(self.data), 1, piece_color)
                 n = 2  # shadow width offset correction
                 self.image.blit(text_img,
                                 (6 + 50 / 2 - text_img.get_width() / 2 - n, 50 / 2 - text_img.get_height() / 2 - n))
