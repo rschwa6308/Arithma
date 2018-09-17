@@ -74,6 +74,7 @@ class Piece:
         self.grid = grid
         self.locked = locked
         self.pos = self.get_pos()
+        self.starting_pos = self.pos
 
         # # Minimalistic - white text on black piece
         # self.image = pygame.Surface((50, 50))
@@ -128,6 +129,7 @@ class NestedPiece(Piece):
         self.grid = grid
         self.locked = locked
         self.pos = self.get_pos()
+        self.starting_pos = self.pos
 
         self.contents = [None for _ in range(self.size)]
         # self.contents = [Piece(1, (0, 0)), Piece("+", (0, 0)), None] # Piece(2, (0, 0))]  # test dummy contents

@@ -145,7 +145,6 @@ def main(screen, level):
 
     # init pieces (build from level)
 
-
     # init buttons
     buttons = [
         Button(615, 545, 50, 50, grid_color, piece_color, button_font, "", "C", check_image),
@@ -209,7 +208,7 @@ def main(screen, level):
                     pos = (int(pos[0] / 60), int(pos[1] / 60))
                     if selected:
                         if pos[0] > 12 or pos[1] > 9 or (
-                                        pos[0] >= 10 and pos[1] >= 9):  # check if outside acceptable range
+                                pos[0] >= 10 and pos[1] >= 9):  # check if outside acceptable range
                             pass
                         elif get_piece(pieces, pos) == False or get_piece(pieces, pos) == selected:
                             selected.grid = pos
@@ -217,7 +216,7 @@ def main(screen, level):
                             selected.grid = pos
                         # insert into nested piece
                         elif isinstance(get_piece(pieces, pos), NestedPiece) and \
-                                        None in get_piece(pieces, pos).contents:
+                                None in get_piece(pieces, pos).contents:
                             print("nesting yay!")
                             get_piece(pieces, pos).insert(selected)
                             pieces.remove(selected)  # temporary
@@ -226,8 +225,8 @@ def main(screen, level):
                             delta_y = 0
                             tries = 0
                             while get_piece(pieces, (pos[0] + delta_x, pos[1] + delta_y)) != False and tries <= 100 or (
-                                                    pos[0] + delta_x > 12 or pos[1] + delta_y > 9 or (
-                                                        pos[0] + delta_x >= 10 and pos[1] + delta_y >= 8)):
+                                    pos[0] + delta_x > 12 or pos[1] + delta_y > 9 or (
+                                    pos[0] + delta_x >= 10 and pos[1] + delta_y >= 8)):
                                 delta_x = randint(-1, 1)
                                 delta_y = randint(-1, 1)
                                 tries += 1
@@ -264,7 +263,7 @@ def main(screen, level):
                                         elif event.type == pygame.MOUSEBUTTONDOWN:
                                             for button in buttons:
                                                 if button.rect.collidepoint((event.pos[0] - 250, event.pos[
-                                                    1] - 100)):  # compensate for offset origin
+                                                                                                     1] - 100)):  # compensate for offset origin
                                                     button.hover = 3
                                                     overlay(screen, buttons, level)
 
@@ -280,7 +279,7 @@ def main(screen, level):
                                                         return
                                                     elif button.key == "R":
                                                         # print("restart")
-                                                        main(screen, level)  # does not work!?!?!
+                                                        main(screen, level)
                                                         return
                                                     elif button.key == "H":
                                                         return
@@ -296,9 +295,6 @@ def main(screen, level):
                                                 pos) and button.hover == 1:  # will only update screen when necessary
                                             button.hover = 0
                                             overlay(screen, buttons, level)
-
-
-
                             else:
                                 # print("failure!!!")
                                 # flash red
@@ -318,6 +314,13 @@ def main(screen, level):
                                 button.txt_color = piece_color
                                 display(screen, pieces, selected, buttons)
                         elif button.key == "R":
+                            for piece in pieces:
+                                delta_x = piece.starting_pos[0] - piece.pos[0]
+                                delta_y = piece.starting_pos[1] - piece.pos[1]
+                                steps = int((delta_x ** 2 + delta_y ** 2) ** 0.5 / 5)
+                                for _ in range(steps):
+                                    piece.pos = (piece.pos[0] + delta_x / steps, piece.pos[1] + delta_y / steps)
+                                    display(screen, pieces, selected, buttons)
                             pieces = load_level(level)
                         elif button.key == "H":
                             return
