@@ -162,7 +162,7 @@ def explode(pieces, nested):
 
 
 def attempt_place(pieces, pos, piece):
-    print(pos, piece)
+    # print(pos, piece)
     delta_x = 1
     delta_y = 0
     tries = 0
@@ -346,7 +346,7 @@ def main(screen, level):
                         # insert into nested piece
                         elif isinstance(get_piece(pieces, pos), NestedPiece) and \
                                         None in get_piece(pieces, pos).contents:
-                            print("nesting yay!")
+                            # print("nesting yay!")
                             get_piece(pieces, pos).insert(selected)
                             pieces.remove(selected)  # temporary
                         else:
