@@ -142,6 +142,10 @@ class NestedPiece(Piece):
         self.contents[self.contents.index(None)] = piece
         self.update_image()
 
+    def remove(self, piece):
+        self.contents[self.contents.index(piece)] = None
+        self.update_image()
+
     def update_image(self):
         self.image = pygame.Surface((50, 50), pygame.SRCALPHA)
         self.image.fill((0, 0, 0, 0))

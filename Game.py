@@ -63,6 +63,116 @@ def overlay(screen, buttons, level):
     pygame.display.update()
 
 
+def pop_up(screen, buttons, level):
+    ###pop up window###
+    buttons = [
+        Button(20, 190, 260, 50, grid_color, piece_color, button_font, "Next Level", "N"),
+        Button(20, 260, 260, 50, grid_color, piece_color, button_font, "Replay", "R"),
+        Button(20, 330, 260, 50, grid_color, piece_color, button_font, "Home", "H")
+
+    ]
+    overlay(screen, buttons, level)
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return
+
+            # down button
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                for button in buttons:
+                    if button.rect.collidepoint(
+                            (event.pos[0] - 250, event.pos[1] - 100)):  # compensate for offset origin
+                        button.hover = 3
+                        overlay(screen, buttons, level)
+
+            # up button
+            elif event.type == pygame.MOUSEBUTTONUP:
+                for button in buttons:
+                    if button.hover == 3:  # include 'button.rect.collidepoint(event.pos)' if cursor must be over button to activate
+                        button.hover = 0
+                        overlay(screen, buttons, level)
+                        # programmatic control
+                        if button.key == "N":
+                            main(screen, level + 1)
+                            return
+                        elif button.key == "R":
+                            # print("restart")
+                            main(screen, level)
+                            return
+                        elif button.key == "H":
+                            return
+
+        # hover shading
+        pos = (pygame.mouse.get_pos()[0] - 250,
+               pygame.mouse.get_pos()[1] - 100)  # compensate for offset origin
+        for button in buttons:
+            if button.rect.collidepoint(pos) and button.hover == 0:
+                button.hover = 1
+                overlay(screen, buttons, level)
+            elif not button.rect.collidepoint(
+                    pos) and button.hover == 1:  # will only update screen when necessary
+                button.hover = 0
+                overlay(screen, buttons, level)
+
+
+def reset_pieces(screen, pieces, selected, buttons, level):
+    for piece in pieces:
+        delta_x = piece.starting_pos[0] - piece.pos[0]
+        delta_y = piece.starting_pos[1] - piece.pos[1]
+        steps = int((delta_x ** 2 + delta_y ** 2) ** 0.5 / 5)
+        for _ in range(steps):
+            piece.pos = (piece.pos[0] + delta_x / steps, piece.pos[1] + delta_y / steps)
+            display(screen, pieces, selected, buttons)
+    pieces = load_level(level)
+
+
+def flash_red(screen, pieces, selected, buttons, button):
+    # flash red
+    for i in range(2):
+        button.color = red
+        button.txt_color = red
+        button.bg = background_color
+        display(screen, pieces, selected, buttons)
+        pygame.time.wait(100)
+        button.color = grid_color
+        button.txt_color = piece_color
+        button.bg = red
+        display(screen, pieces, selected, buttons)
+        pygame.time.wait(100)
+    button.bg = white
+    button.color = grid_color
+    button.txt_color = piece_color
+    display(screen, pieces, selected, buttons)
+
+
+def explode(pieces, nested):
+    for piece in nested.contents:
+        if piece is not None:
+            nested.remove(piece)
+            pieces.append(piece)
+            attempt_place(pieces, nested.grid, piece)
+    nested.contents = [None for _ in range(nested.size)]
+
+
+def attempt_place(pieces, pos, piece):
+    print(pos, piece)
+    delta_x = 1
+    delta_y = 0
+    tries = 0
+    while get_piece(pieces, (pos[0] + delta_x, pos[1] + delta_y)) != False or (
+                            pos[0] + delta_x > 12 or pos[1] + delta_y > 9 or (
+                                pos[0] + delta_x >= 10 and pos[1] + delta_y >= 8)):
+        delta_x = randint(-1, 1)
+        delta_y = randint(-1, 1)
+        tries += 1
+        if tries > 100:
+            print("could not find a spot!")
+            break
+    if tries < 100:
+        piece.grid = (pos[0] + delta_x, pos[1] + delta_y)
+    piece.pos = piece.get_pos()
+
+
 def display(screen, pieces, selected, buttons):
     width = screen.get_width()
     height = screen.get_height()
@@ -179,27 +289,39 @@ def main(screen, level):
             if event.type == KEYDOWN:
                 if event.key == K_RETURN:
                     if check_scrabble(pieces):
-                        print("success!!!")
-                        overlay(screen, buttons, level)  # TODO actually make this work
+                        # print("success!!!")
+                        pop_up(screen, buttons, level)
+                        return
                     else:
-                        print("failure!!!")
+                        # print("failure!!!")
+                        pass
 
             # select (pick up) piece
             if event.type == MOUSEBUTTONDOWN:
+                pos = mouse.get_pos()
+                # decide grid location based on whether on board or rack
+                if pos[0] > 600:
+                    pos = (int((pos[0] - 10) / 60), int(pos[1] / 60))
+                else:
+                    pos = (int(pos[0] / 60), int(pos[1] / 60))
+                clicked = get_piece(pieces, pos)
+
                 if event.button == 1:
-                    pos = mouse.get_pos()
-                    # decide grid location based on whether on board or rack
-                    if pos[0] > 600:
-                        pos = (int((pos[0] - 10) / 60), int(pos[1] / 60))
-                    else:
-                        pos = (int(pos[0] / 60), int(pos[1] / 60))
-                    clicked = get_piece(pieces, pos)
                     if clicked and not clicked.locked:  # if clicked is not None and piece is not locked
                         selected = clicked
-                for button in buttons:
-                    if button.rect.collidepoint(event.pos):
-                        button.hover = 3
-                        display(screen, pieces, selected, buttons)
+                    # detect button press
+                    for button in buttons:
+                        if button.rect.collidepoint(event.pos):
+                            button.hover = 3
+                            display(screen, pieces, selected, buttons)
+
+                elif event.button == 3:
+                    if clicked and not clicked.locked:
+                        if isinstance(clicked, NestedPiece):
+                            explode(pieces, clicked)
+                            display(screen, pieces, selected, buttons)
+                        else:
+                            pass
 
             # deselect (place) piece
             if event.type == MOUSEBUTTONUP:
@@ -208,7 +330,7 @@ def main(screen, level):
                     pos = (int(pos[0] / 60), int(pos[1] / 60))
                     if selected:
                         if pos[0] > 12 or pos[1] > 9 or (
-                                pos[0] >= 10 and pos[1] >= 9):  # check if outside acceptable range
+                                        pos[0] >= 10 and pos[1] >= 9):  # check if outside acceptable range
                             pass
                         elif get_piece(pieces, pos) == False or get_piece(pieces, pos) == selected:
                             selected.grid = pos
@@ -216,22 +338,12 @@ def main(screen, level):
                             selected.grid = pos
                         # insert into nested piece
                         elif isinstance(get_piece(pieces, pos), NestedPiece) and \
-                                None in get_piece(pieces, pos).contents:
+                                        None in get_piece(pieces, pos).contents:
                             print("nesting yay!")
                             get_piece(pieces, pos).insert(selected)
                             pieces.remove(selected)  # temporary
                         else:
-                            delta_x = 1
-                            delta_y = 0
-                            tries = 0
-                            while get_piece(pieces, (pos[0] + delta_x, pos[1] + delta_y)) != False and tries <= 100 or (
-                                    pos[0] + delta_x > 12 or pos[1] + delta_y > 9 or (
-                                    pos[0] + delta_x >= 10 and pos[1] + delta_y >= 8)):
-                                delta_x = randint(-1, 1)
-                                delta_y = randint(-1, 1)
-                                tries += 1
-                            if tries < 100:
-                                selected.grid = (pos[0] + delta_x, pos[1] + delta_y)
+                            attempt_place(pieces, pos, selected)
 
                         selected.pos = selected.get_pos()
                         selected = False
@@ -245,83 +357,13 @@ def main(screen, level):
                         if button.key == "C":
                             if check_scrabble(pieces):
                                 # print("success!!!")
-
-                                ###pop up window###
-                                buttons = [
-                                    Button(20, 190, 260, 50, grid_color, piece_color, button_font, "Next Level", "N"),
-                                    Button(20, 260, 260, 50, grid_color, piece_color, button_font, "Replay", "R"),
-                                    Button(20, 330, 260, 50, grid_color, piece_color, button_font, "Home", "H")
-
-                                ]
-                                overlay(screen, buttons, level)
-                                while True:
-                                    for event in pygame.event.get():
-                                        if event.type == pygame.QUIT:
-                                            return
-
-                                        # down button
-                                        elif event.type == pygame.MOUSEBUTTONDOWN:
-                                            for button in buttons:
-                                                if button.rect.collidepoint((event.pos[0] - 250, event.pos[
-                                                                                                     1] - 100)):  # compensate for offset origin
-                                                    button.hover = 3
-                                                    overlay(screen, buttons, level)
-
-                                        # up button
-                                        elif event.type == pygame.MOUSEBUTTONUP:
-                                            for button in buttons:
-                                                if button.hover == 3:  # include 'button.rect.collidepoint(event.pos)' if cursor must be over button to activate
-                                                    button.hover = 0
-                                                    overlay(screen, buttons, level)
-                                                    # programmatic control
-                                                    if button.key == "N":
-                                                        main(screen, level + 1)
-                                                        return
-                                                    elif button.key == "R":
-                                                        # print("restart")
-                                                        main(screen, level)
-                                                        return
-                                                    elif button.key == "H":
-                                                        return
-
-                                    # hover shading
-                                    pos = (pygame.mouse.get_pos()[0] - 250,
-                                           pygame.mouse.get_pos()[1] - 100)  # compensate for offset origin
-                                    for button in buttons:
-                                        if button.rect.collidepoint(pos) and button.hover == 0:
-                                            button.hover = 1
-                                            overlay(screen, buttons, level)
-                                        elif not button.rect.collidepoint(
-                                                pos) and button.hover == 1:  # will only update screen when necessary
-                                            button.hover = 0
-                                            overlay(screen, buttons, level)
+                                pop_up(screen, buttons, level)
+                                return
                             else:
                                 # print("failure!!!")
-                                # flash red
-                                for i in range(2):
-                                    button.color = red
-                                    button.txt_color = red
-                                    button.bg = background_color
-                                    display(screen, pieces, selected, buttons)
-                                    pygame.time.wait(100)
-                                    button.color = grid_color
-                                    button.txt_color = piece_color
-                                    button.bg = red
-                                    display(screen, pieces, selected, buttons)
-                                    pygame.time.wait(100)
-                                button.bg = white
-                                button.color = grid_color
-                                button.txt_color = piece_color
-                                display(screen, pieces, selected, buttons)
+                                flash_red(screen, pieces, selected, buttons, button)
                         elif button.key == "R":
-                            for piece in pieces:
-                                delta_x = piece.starting_pos[0] - piece.pos[0]
-                                delta_y = piece.starting_pos[1] - piece.pos[1]
-                                steps = int((delta_x ** 2 + delta_y ** 2) ** 0.5 / 5)
-                                for _ in range(steps):
-                                    piece.pos = (piece.pos[0] + delta_x / steps, piece.pos[1] + delta_y / steps)
-                                    display(screen, pieces, selected, buttons)
-                            pieces = load_level(level)
+                            reset_pieces(screen, pieces, selected, buttons, level)
                         elif button.key == "H":
                             return
 
@@ -339,5 +381,3 @@ def main(screen, level):
                 elif not button.rect.collidepoint(pos) and button.hover == 1:  # will only update screen when necessary
                     button.hover = 0
                     display(screen, pieces, selected, buttons)
-
-# main(L1)
