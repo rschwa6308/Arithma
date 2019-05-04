@@ -74,6 +74,7 @@ class Piece:
         self.grid = grid
         self.locked = locked
         self.pos = self.get_pos()
+        self.starting_grid = grid
         self.starting_pos = self.pos
 
         # # Minimalistic - white text on black piece
@@ -129,6 +130,7 @@ class NestedPiece(Piece):
         self.grid = grid
         self.locked = locked
         self.pos = self.get_pos()
+        self.starting_grid = grid
         self.starting_pos = self.pos
 
         self.contents = [None for _ in range(self.size)]

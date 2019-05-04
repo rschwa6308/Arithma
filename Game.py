@@ -117,13 +117,20 @@ def pop_up(screen, buttons, level):
 
 def reset_pieces(screen, pieces, selected, buttons, level):
     for piece in pieces:
+        if isinstance(piece, NestedPiece):
+            explode(pieces, piece)
+            display(screen, pieces, selected, buttons)
+
+    for piece in pieces:
         delta_x = piece.starting_pos[0] - piece.pos[0]
         delta_y = piece.starting_pos[1] - piece.pos[1]
-        steps = int((delta_x ** 2 + delta_y ** 2) ** 0.5 / 5)
+        steps = int((delta_x ** 2 + delta_y ** 2) ** 0.5 / 10)
         for _ in range(steps):
             piece.pos = (piece.pos[0] + delta_x / steps, piece.pos[1] + delta_y / steps)
             display(screen, pieces, selected, buttons)
-    pieces = load_level(level)
+            pygame.time.wait(1)
+        piece.grid = piece.starting_grid
+        display(screen, pieces, selected, buttons)
 
 
 def flash_red(screen, pieces, selected, buttons, button):
@@ -364,6 +371,8 @@ def main(screen, level):
                                 flash_red(screen, pieces, selected, buttons, button)
                         elif button.key == "R":
                             reset_pieces(screen, pieces, selected, buttons, level)
+                            pygame.time.wait(100)       # allow for reset animation to finish (asynchronous?)
+                            pieces = load_level(level)
                         elif button.key == "H":
                             return
 
